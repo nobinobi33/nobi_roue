@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validation · NOBI NOBI Staff</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+  :root {
+    --yellow: #FFD600;
+    --black: #1A1A1A;
+    --green: #22C55E;
+    --red: #EF4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  .staff-badge {
+    background: rgba(255,214,0,0.1);
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-family: 'Zen Dots', cursive;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Zen Dots', cursive;
+    color: var(--yellow);
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  /* Scanner */
+  .scanner-box {
+    width: 100%;
+    max-width: 340px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,214,0,0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  #preview {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    background: #000;
+  }
+
+  .scanner-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .scanner-frame {
+    width: 60%;
+    aspect-ratio: 1;
+    border: 3px solid var(--yellow);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);
+  }
+
+  .scan-line {
+    position: absolute;
+    width: 60%;
+    height: 2px;
+    background: var(--yellow);
+    animation: scanMove 2s linear infinite;
+    opacity: 0.8;
+  }
+
+  @keyframes scanMove {
+    0% { top: 20%; }
+    100% { top: 80%; }
+  }
+
+  /* Buttons */
+  .btn-start {
+    background: var(--yellow);
+    color: var(--black);
+    border: none;
+    border-radius: 50px;
+    padding: 16px 32px;
+    font-family: 'Zen Dots', cursive;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 0 #B8A000;
+    transition: all 0.1s;
+  }
+
+  .btn-start:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #B8A000;
+  }
+
+  /* Résultat validation */
+  .result-card {
+    width: 100%;
+    max-width: 340px;
+    border-radius: 20px;
+    padding: 28px 24px;
+    text-align: center;
+    display: none;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .result-card.valid {
+    display: block;
+    background: rgba(34,197,94,0.1);
+    border: 3px solid var(--green);
+  }
+
+  .result-card.invalid {
+    display: block;
+    background: rgba(239,68,68,0.1);
+    border: 3px solid var(--red);
+  }
+
+  .result-icon { font-size: 64px; margin-bottom: 12px; display: block; }
+
+  .result-status {
+    font-family: 'Zen Dots', cursive;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .valid .result-status { color: var(--green); }
+  .invalid .result-status { color: var(--red); }
+
+  .result-prize-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .result-code {
+    font-family: 'Zen Dots', cursive;
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+
+  .btn-next {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+
+  .btn-next:hover { background: rgba(255,255,255,0.15); }
+
+  /* Stats */
+  .stats-section {
+    width: 100%;
+    max-width: 340px;
+    margin-top: 24px;
+  }
+
+  .stats-title {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-chip {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Zen Dots', cursive;
+    font-size: 22px;
+    color: var(--yellow);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .btn-reset-stats {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.2);
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+  }
+
+  /* Camera permission error */
+  .camera-error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #FCA5A5;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    text-align: center;
+    width: 100%;
+    max-width: 340px;
+    margin-bottom: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="staff-badge">🔑 Interface Staff</div>
+<h1>Validation des Gains</h1>
+<p class="subtitle">Scannez le QR code affiché sur le téléphone du client</p>
+
+<div class="camera-error" id="cameraError">
+  ⚠️ Accès caméra refusé.<br>Veuillez autoriser la caméra dans les paramètres du navigateur.
+</div>
+
+<div class="scanner-box" id="scannerBox" style="display:none">
+  <video id="preview" playsinline autoplay muted></video>
+  <div class="scanner-overlay">
+    <div class="scanner-frame"></div>
+    <div class="scan-line"></div>
+  </div>
+</div>
+
+<button class="btn-start" id="startBtn" onclick="startScanner()">
+  📷 Démarrer le scanner
+</button>
+
+<!-- Résultat -->
+<div class="result-card" id="resultCard">
+  <span class="result-icon" id="resultIcon">✅</span>
+  <div class="result-status" id="resultStatus">VALIDE</div>
+  <div class="result-prize-name" id="resultPrizeName"></div>
+  <div class="result-code" id="resultCodeDisplay"></div>
+  <button class="btn-next" onclick="resetScanner()">🔄 Scanner suivant</button>
+</div>
+
+<!-- Stats journée -->
+<div class="stats-section">
+  <div class="stats-title">📊 Statistiques du jour</div>
+  <div class="stats-grid">
+    <div class="stat-chip">
+      <span class="stat-val" id="statTotal">0</span>
+      <span class="stat-label">Total validés</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-val" id="statMenu">0</span>
+      <span class="stat-label">🍱 Menus</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-val" id="statGyoza">0</span>
+      <span class="stat-label">🥟 Gyozas</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-val" id="statFrites">0</span>
+      <span class="stat-label">🍟 Frites</span>
+    </div>
+  </div>
+  <button class="btn-reset-stats" onclick="resetStats()">Réinitialiser les stats</button>
+</div>
+
+<script>
+const STATS_KEY = 'nobi_staff_stats';
+const USED_CODES_KEY = 'nobi_used_codes';
+
+let stream = null;
+let scanning = false;
+let scanInterval = null;
+
+// ==========================================
+// STATS
+// ==========================================
+function getStats() {
+  const stored = localStorage.getItem(STATS_KEY);
+  const today = new Date().toDateString();
+  if (!stored) return { date: today, total: 0, menu: 0, gyoza: 0, frites: 0 };
+  const data = JSON.parse(stored);
+  if (data.date !== today) return { date: today, total: 0, menu: 0, gyoza: 0, frites: 0 };
+  return data;
+}
+
+function saveStats(stats) {
+  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+function updateStatsUI() {
+  const stats = getStats();
+  document.getElementById('statTotal').textContent = stats.total;
+  document.getElementById('statMenu').textContent = stats.menu;
+  document.getElementById('statGyoza').textContent = stats.gyoza;
+  document.getElementById('statFrites').textContent = stats.frites;
+}
+
+function incrementStat(prizeIndex) {
+  const stats = getStats();
+  stats.total++;
+  if (prizeIndex === 0) stats.menu++;
+  if (prizeIndex === 1) stats.gyoza++;
+  if (prizeIndex === 2) stats.frites++;
+  saveStats(stats);
+  updateStatsUI();
+}
+
+function resetStats() {
+  if (confirm('Réinitialiser les statistiques du jour ?')) {
+    localStorage.removeItem(STATS_KEY);
+    updateStatsUI();
+  }
+}
+
+// ==========================================
+// USED CODES
+// ==========================================
+function isCodeUsed(code) {
+  const stored = localStorage.getItem(USED_CODES_KEY);
+  if (!stored) return false;
+  const data = JSON.parse(stored);
+  const today = new Date().toDateString();
+  if (data.date !== today) return false;
+  return data.codes.includes(code);
+}
+
+function markCodeUsed(code) {
+  const stored = localStorage.getItem(USED_CODES_KEY);
+  const today = new Date().toDateString();
+  let data = { date: today, codes: [] };
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    if (parsed.date === today) data = parsed;
+  }
+  data.codes.push(code);
+  localStorage.setItem(USED_CODES_KEY, JSON.stringify(data));
+}
+
+// ==========================================
+// SCANNER
+// ==========================================
+async function startScanner() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } }
+    });
+    
+    const video = document.getElementById('preview');
+    video.srcObject = stream;
+    await video.play();
+
+    document.getElementById('scannerBox').style.display = 'block';
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('resultCard').className = 'result-card';
+    document.getElementById('cameraError').style.display = 'none';
+
+    scanning = true;
+    scanFrame();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('cameraError').style.display = 'block';
+  }
+}
+
+function scanFrame() {
+  if (!scanning) return;
+
+  const video = document.getElementById('preview');
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+    requestAnimationFrame(scanFrame);
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height, {
+    inversionAttempts: 'dontInvert'
+  });
+
+  if (code) {
+    scanning = false;
+    processQRCode(code.data);
+    return;
+  }
+
+  requestAnimationFrame(scanFrame);
+}
+
+function processQRCode(data) {
+  stopStream();
+  
+  try {
+    const parsed = JSON.parse(data);
+    const { code, prize, prizeIndex, ts } = parsed;
+
+    // Vérif timestamp (valide 24h)
+    const age = Date.now() - ts;
+    const maxAge = 24 * 60 * 60 * 1000;
+
+    if (age > maxAge) {
+      showInvalid(code, 'QR code expiré (+ de 24h)');
+      return;
+    }
+
+    if (isCodeUsed(code)) {
+      showInvalid(code, 'Ce code a déjà été utilisé !');
+      return;
+    }
+
+    // Valide !
+    markCodeUsed(code);
+    incrementStat(prizeIndex);
+    showValid(code, prize, prizeIndex);
+
+  } catch (e) {
+    showInvalid('???', 'QR code non reconnu');
+  }
+}
+
+function showValid(code, prize, prizeIndex) {
+  const emojis = ['🍱', '🥟', '🍟'];
+  const card = document.getElementById('resultCard');
+  card.className = 'result-card valid';
+  document.getElementById('resultIcon').textContent = emojis[prizeIndex] || '✅';
+  document.getElementById('resultStatus').textContent = '✅ VALIDE - DONNER LE LOT';
+  document.getElementById('resultPrizeName').textContent = prize;
+  document.getElementById('resultCodeDisplay').textContent = 'CODE : ' + code;
+  document.getElementById('scannerBox').style.display = 'none';
+  document.getElementById('startBtn').style.display = 'none';
+
+  // Vibration si supportée
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+}
+
+function showInvalid(code, reason) {
+  const card = document.getElementById('resultCard');
+  card.className = 'result-card invalid';
+  document.getElementById('resultIcon').textContent = '❌';
+  document.getElementById('resultStatus').textContent = 'INVALIDE - NE PAS DONNER';
+  document.getElementById('resultPrizeName').textContent = reason;
+  document.getElementById('resultCodeDisplay').textContent = 'CODE : ' + code;
+  document.getElementById('scannerBox').style.display = 'none';
+  document.getElementById('startBtn').style.display = 'none';
+
+  if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+}
+
+function stopStream() {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  scanning = false;
+}
+
+function resetScanner() {
+  stopStream();
+  document.getElementById('resultCard').className = 'result-card';
+  document.getElementById('scannerBox').style.display = 'none';
+  document.getElementById('startBtn').style.display = 'block';
+  updateStatsUI();
+}
+
+// Init
+updateStatsUI();
+</script>
+
+</body>
+</html>

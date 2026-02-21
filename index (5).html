@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fais Tourner la Nobi Roue 🎡</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --nobi-yellow: #FFD600;
+    --nobi-black: #1A1A1A;
+    --nobi-white: #FFFFFF;
+    --nobi-red: #FF3366;
+    --pink: #FF6B9D;
+    --cyan: #66D9EF;
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FFD600 50%, #66D9EF 100%);
+    font-family: 'Fredoka', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Kawaii sparkles background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 2%),
+      radial-gradient(circle at 40% 80%, rgba(255,255,255,0.35) 0%, transparent 2%),
+      radial-gradient(circle at 90% 70%, rgba(255,255,255,0.3) 0%, transparent 2%),
+      radial-gradient(circle at 10% 60%, rgba(255,255,255,0.4) 0%, transparent 2%);
+    background-size: 200px 200px;
+    animation: sparkle 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .logo-badge {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+      0 8px 20px rgba(0,0,0,0.3),
+      0 0 0 6px rgba(255,255,255,0.4),
+      inset 0 4px 12px rgba(255,255,255,0.5);
+    overflow: hidden;
+    border: 4px solid white;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .logo-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .title-main {
+    font-family: 'Baloo 2', cursive;
+    font-size: 28px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 
+      0 2px 0 rgba(0,0,0,0.2),
+      0 4px 8px rgba(0,0,0,0.3),
+      0 0 20px rgba(255,255,255,0.6);
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  .title-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    margin-top: 6px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Wheel container */
+  .wheel-wrapper {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    margin: 10px auto;
+  }
+
+  .wheel-outer {
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: white;
+    padding: 10px;
+    box-shadow: 
+      0 0 0 8px rgba(255,255,255,0.6),
+      0 12px 40px rgba(0,0,0,0.4),
+      inset 0 -8px 20px rgba(0,0,0,0.1),
+      inset 0 8px 20px rgba(255,255,255,0.8);
+    position: relative;
+    animation: wheelGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes wheelGlow {
+    0%, 100% { box-shadow: 
+      0 0 0 8px rgba(255,255,255,0.6),
+      0 12px 40px rgba(0,0,0,0.4),
+      inset 0 -8px 20px rgba(0,0,0,0.1),
+      inset 0 8px 20px rgba(255,255,255,0.8);
+    }
+    50% { box-shadow: 
+      0 0 0 8px rgba(255,255,255,0.8),
+      0 12px 50px rgba(255,107,157,0.4),
+      inset 0 -8px 20px rgba(0,0,0,0.1),
+      inset 0 8px 20px rgba(255,255,255,1);
+    }
+  }
+
+  #wheel-canvas {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  }
+
+  /* Pointeur */
+  .wheel-pointer {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+    animation: pointerBounce 1s ease-in-out infinite;
+  }
+
+  @keyframes pointerBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-4px); }
+  }
+
+  .wheel-pointer svg {
+    width: 44px;
+    height: 50px;
+  }
+
+  /* Centre roue */
+  .wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFD600 0%, #FFA500 100%);
+    border: 5px solid white;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 
+      0 6px 16px rgba(0,0,0,0.3),
+      inset 0 4px 8px rgba(255,255,255,0.6),
+      inset 0 -4px 8px rgba(255,165,0,0.4);
+  }
+
+  /* Bouton tourner */
+  .spin-btn {
+    background: linear-gradient(135deg, #FF3366 0%, #FF6B9D 100%);
+    color: white;
+    border: none;
+    border-radius: 60px;
+    padding: 20px 50px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 22px;
+    font-weight: 800;
+    cursor: pointer;
+    margin: 20px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 
+      0 8px 0 #CC0033,
+      0 12px 28px rgba(255,51,102,0.4),
+      inset 0 2px 0 rgba(255,255,255,0.4);
+    transition: all 0.1s ease;
+    position: relative;
+    top: 0;
+    width: 100%;
+    max-width: 340px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .spin-btn:active:not(:disabled) {
+    box-shadow: 
+      0 3px 0 #CC0033,
+      0 6px 14px rgba(255,51,102,0.3),
+      inset 0 2px 0 rgba(255,255,255,0.4);
+    top: 5px;
+  }
+
+  .spin-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Modal résultat */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F7 100%);
+    border-radius: 32px;
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 
+      0 0 80px rgba(255,107,157,0.6),
+      inset 0 4px 16px rgba(255,255,255,0.8);
+    animation: giftReveal 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modal-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #FF6B9D, #FFD600, #66D9EF, #FF6B9D);
+    background-size: 400% 400%;
+    border-radius: 32px;
+    z-index: -1;
+    animation: borderFlow 3s linear infinite;
+  }
+
+  @keyframes borderFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes giftReveal {
+    0% { 
+      transform: scale(0.3) rotate(-15deg); 
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.1) rotate(5deg);
+    }
+    100% { 
+      transform: scale(1) rotate(0deg); 
+      opacity: 1;
+    }
+  }
+
+  /* Mascotte appear */
+  .mascot-reveal {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 16px;
+    animation: mascotPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s backwards;
+  }
+
+  .mascot-reveal img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2));
+  }
+
+  @keyframes mascotPop {
+    0% { transform: scale(0) rotate(-180deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .result-emoji { 
+    font-size: 72px; 
+    margin-bottom: 12px; 
+    display: block;
+    animation: emojiPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.4s backwards;
+  }
+
+  @keyframes emojiPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .result-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 18px;
+    background: linear-gradient(135deg, #FF3366, #FF6B9D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 800;
+  }
+
+  .result-prize {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1A1A1A;
+    margin-bottom: 20px;
+    line-height: 1.3;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* QR Code section - moins proéminent visuellement */
+  .qr-section {
+    background: linear-gradient(135deg, #F5F5F5 0%, #E8E8E8 100%);
+    border: 2px dashed rgba(255,107,157,0.3);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0 8px;
+    display: none;
+  }
+
+  .qr-section.visible { display: block; }
+
+  .qr-section::before {
+    content: '👇 Montrez ce code au comptoir';
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  #qrcode {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  #qrcode canvas, #qrcode img {
+    border-radius: 8px;
+  }
+
+  .qr-code-text {
+    font-family: 'Baloo 2', cursive;
+    font-size: 20px;
+    color: #666;
+    letter-spacing: 4px;
+    text-align: center;
+    font-weight: 900;
+  }
+
+  .qr-instruction {
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* Bouton avis Google - TRÈS PROÉMINENT */
+  .google-btn {
+    display: none; /* Contrôlé par JS */
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+    color: white;
+    border: none;
+    border-radius: 60px;
+    padding: 18px 32px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    width: 100%;
+    margin: 0 0 12px 0;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 
+      0 8px 0 #1a73e8,
+      0 12px 28px rgba(66,133,244,0.5),
+      inset 0 3px 0 rgba(255,255,255,0.4);
+    animation: pulseBig 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseBig {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); box-shadow: 
+      0 8px 0 #1a73e8,
+      0 12px 32px rgba(66,133,244,0.7),
+      inset 0 3px 0 rgba(255,255,255,0.4);
+    }
+  }
+
+  .google-btn:active {
+    box-shadow: 
+      0 3px 0 #1a73e8,
+      0 6px 14px rgba(66,133,244,0.4),
+      inset 0 3px 0 rgba(255,255,255,0.4);
+    transform: translateY(5px);
+    animation: none;
+  }
+
+  .lost-message {
+    font-size: 16px;
+    color: #666;
+    margin: 8px 0 20px;
+    line-height: 1.6;
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: linear-gradient(135deg, #E0E0E0, #F5F5F5);
+    border: none;
+    color: #666;
+    border-radius: 60px;
+    padding: 14px 32px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    transition: all 0.2s;
+    box-shadow: 
+      0 4px 0 #BDBDBD,
+      inset 0 2px 0 rgba(255,255,255,0.6);
+  }
+
+  .close-btn:active { 
+    transform: translateY(3px);
+    box-shadow: 
+      0 1px 0 #BDBDBD,
+      inset 0 2px 0 rgba(255,255,255,0.6);
+  }
+
+  /* Confetti enhanced */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    z-index: 200;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+    border-radius: 50%;
+  }
+
+  @keyframes confettiFall {
+    to { 
+      transform: translateY(110vh) rotate(720deg) scale(0.5); 
+      opacity: 0;
+    }
+  }
+
+  /* Déjà joué */
+  .already-played {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,245,247,0.95));
+    border: 3px solid rgba(255,107,157,0.3);
+    border-radius: 24px;
+    padding: 24px;
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 340px;
+    margin-top: 12px;
+    box-shadow: 
+      0 8px 24px rgba(0,0,0,0.15),
+      inset 0 2px 0 rgba(255,255,255,0.8);
+  }
+
+  .already-played strong { 
+    color: #FF3366; 
+    font-weight: 800;
+    font-size: 17px;
+  }
+
+  /* Spin animation */
+  .spinning { transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 1.0); }
+
+  /* Tagline */
+  .tagline {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 20px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<div class="container">
+  
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <img src="nobi-logo.png" alt="NOBI NOBI">
+    </div>
+    <div class="title-main">Fais Tourner<br>la Nobi Roue</div>
+    <div class="title-sub">Japanese Street Food · Bègles</div>
+  </div>
+
+  <!-- Wheel -->
+  <div class="wheel-wrapper">
+    <div class="wheel-outer">
+      <canvas id="wheel-canvas" width="320" height="320"></canvas>
+      <div class="wheel-center">✨</div>
+    </div>
+    <div class="wheel-pointer">
+      <svg viewBox="0 0 44 50" fill="none">
+        <defs>
+          <linearGradient id="pointerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#FF3366;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <path d="M22 50 L0 10 Q22 0 44 10 Z" fill="url(#pointerGrad)"/>
+        <path d="M22 46 L4 12 Q22 4 40 12 Z" fill="#FFB3D9"/>
+        <circle cx="22" cy="12" r="6" fill="white" opacity="0.6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Bouton -->
+  <button class="spin-btn" id="spinBtn" onclick="spinWheel()">
+    ✨ TOURNER LA ROUE !
+  </button>
+
+  <div class="tagline">🎁 Tournez et découvrez votre surprise mystère ! 🎁</div>
+
+</div>
+
+<!-- Modal Résultat -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal-card">
+    <!-- Mascotte apparition -->
+    <div class="mascot-reveal" id="mascotReveal" style="display:none">
+      <img src="nobi-logo.png" alt="NOBI">
+    </div>
+    
+    <span class="result-emoji" id="resultEmoji">🎉</span>
+    <div class="result-title" id="resultTitle">BRAVO !</div>
+    <div class="result-prize" id="resultPrize"></div>
+
+    <!-- Message avant avis (pour gains) -->
+    <div class="pre-review-message" id="preReviewMessage" style="display:none">
+      <p style="font-size: 15px; color: #666; margin: 12px 0 16px; line-height: 1.6; font-weight: 600;">
+        🙏 <strong style="color: #FF3366;">Avant de récupérer votre cadeau</strong>, aidez-nous en 30 secondes !<br>
+        Votre avis nous aide énormément à grandir 💛
+      </p>
+    </div>
+
+    <!-- Bouton Google Avis - POSITIONNÉ EN PREMIER -->
+    <a href="http://search.google.com/local/writereview?placeid=ChIJKbaw7qknVQ0R-X8BYske1Ns" 
+       target="_blank" class="google-btn" id="googleBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Laisser un avis Google
+    </a>
+
+    <!-- QR Code pour gains - EN DESSOUS DU BOUTON -->
+    <div class="qr-section" id="qrSection">
+      <div id="qrcode"></div>
+      <div class="qr-code-text" id="qrCodeText"></div>
+    </div>
+
+    <!-- Message si perdu -->
+    <div class="lost-message" id="lostMessage" style="display:none">
+      Pas de chance cette fois... 😅<br>
+      Mais votre avis compte quand même pour nous !
+    </div>
+
+    <button class="close-btn" onclick="closeModal()">Fermer</button>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// CONFIGURATION - 10 SEGMENTS MYSTÈRE
+// ==========================================
+// Roue visuelle : 10 parts égales avec 4 couleurs alternées
+const VISUAL_SEGMENTS = [
+  { color: '#FFD600' },  // Jaune
+  { color: '#1A1A1A' },  // Noir
+  { color: '#FF3366' },  // Rouge
+  { color: '#FFFFFF' },  // Blanc
+  { color: '#FFD600' },  // Jaune
+  { color: '#1A1A1A' },  // Noir
+  { color: '#FF3366' },  // Rouge
+  { color: '#FFFFFF' },  // Blanc
+  { color: '#FFD600' },  // Jaune
+  { color: '#1A1A1A' },  // Noir
+];
+
+// Lots réels (avec probabilités cachées)
+const PRIZES = [
+  { label: '1 Menu Complet', emoji: '🍱', weight: 1, prizeIndex: 0 },
+  { label: '4 Gyozas Poulet', emoji: '🥟', weight: 20, prizeIndex: 1 },
+  { label: 'Frites Twister', emoji: '🍟', weight: 34, prizeIndex: 2 },
+  { label: 'Pas cette fois...', emoji: '😢', weight: 45, prizeIndex: 3 },
+];
+
+const STORAGE_KEY = 'nobi_played_today';
+const FINGERPRINT_KEY = 'nobi_device_fp';
+
+// ==========================================
+// BROWSER FINGERPRINTING - Anti-rejeu
+// ==========================================
+function generateFingerprint() {
+  const nav = navigator;
+  const screen = window.screen;
+  
+  // Collecte d'informations uniques du device
+  const components = [
+    nav.userAgent,
+    nav.language,
+    screen.colorDepth,
+    screen.width + 'x' + screen.height,
+    screen.availWidth + 'x' + screen.availHeight,
+    new Date().getTimezoneOffset(),
+    nav.platform,
+    nav.hardwareConcurrency || 'unknown',
+    nav.deviceMemory || 'unknown',
+    !!window.sessionStorage,
+    !!window.localStorage,
+    nav.cookieEnabled
+  ];
+  
+  // Génère un hash simple mais efficace
+  const fingerprint = components.join('|');
+  let hash = 0;
+  for (let i = 0; i < fingerprint.length; i++) {
+    const char = fingerprint.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  
+  return 'FP' + Math.abs(hash).toString(36).toUpperCase();
+}
+
+function storeFingerprint() {
+  const fp = generateFingerprint();
+  // Triple stockage
+  localStorage.setItem(FINGERPRINT_KEY, fp);
+  sessionStorage.setItem(FINGERPRINT_KEY, fp);
+  document.cookie = `nobi_fp=${fp}; max-age=86400; path=/`; // 24h
+  return fp;
+}
+
+function getStoredFingerprint() {
+  // Vérifie dans les 3 emplacements
+  return localStorage.getItem(FINGERPRINT_KEY) || 
+         sessionStorage.getItem(FINGERPRINT_KEY) ||
+         (document.cookie.match(/nobi_fp=([^;]+)/) || [])[1] ||
+         null;
+}
+
+function checkAlreadyPlayed() {
+  const today = new Date().toDateString();
+  const currentFP = generateFingerprint();
+  
+  // Vérification 1: localStorage classique
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      const data = JSON.parse(stored);
+      if (data.date === today) {
+        // Même jour détecté
+        return true;
+      }
+    } catch (e) {}
+  }
+  
+  // Vérification 2: Fingerprint match
+  const storedFP = getStoredFingerprint();
+  if (storedFP && storedFP === currentFP) {
+    // Même device détecté - vérifier s'il a joué aujourd'hui
+    const fpPlayData = localStorage.getItem(`nobi_fp_${storedFP}`);
+    if (fpPlayData) {
+      try {
+        const data = JSON.parse(fpPlayData);
+        if (data.date === today) {
+          return true;
+        }
+      } catch (e) {}
+    }
+  }
+  
+  // Vérification 3: sessionStorage (navigation privée)
+  const sessionCheck = sessionStorage.getItem(STORAGE_KEY);
+  if (sessionCheck) {
+    try {
+      const data = JSON.parse(sessionCheck);
+      if (data.date === today) {
+        return true;
+      }
+    } catch (e) {}
+  }
+  
+  return false;
+}
+
+function markPlayed(prizeIndex, code) {
+  const today = new Date().toDateString();
+  const timestamp = Date.now();
+  const fp = storeFingerprint();
+  
+  const playData = {
+    date: today,
+    prizeIndex,
+    code,
+    timestamp,
+    fingerprint: fp
+  };
+  
+  // Stockage multiple pour redondance
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(playData));
+  localStorage.setItem(`nobi_fp_${fp}`, JSON.stringify(playData));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(playData));
+  
+  // Cookie backup
+  document.cookie = `nobi_played=${today}; max-age=86400; path=/`;
+}
+const canvas = document.getElementById('wheel-canvas');
+const ctx = canvas.getContext('2d');
+const segmentAngle = (2 * Math.PI) / 10; // 10 parts égales
+
+let currentRotation = 0;
+let isSpinning = false;
+
+function drawWheel(rotation) {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = cx - 2;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let startAngle = rotation;
+
+  VISUAL_SEGMENTS.forEach((segment, i) => {
+    const endAngle = startAngle + segmentAngle;
+
+    // Segment avec effet glossy
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.closePath();
+    
+    // Couleur unie
+    ctx.fillStyle = segment.color;
+    ctx.fill();
+
+    // Bordure
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Effet brillant glossy sur chaque segment
+    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    gradient.addColorStop(0, 'rgba(255,255,255,0.3)');
+    gradient.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0.1)');
+    
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    startAngle = endAngle;
+  });
+
+  // Cercle central glossy
+  const centerGrad = ctx.createRadialGradient(cx, cy - 10, 0, cx, cy, 35);
+  centerGrad.addColorStop(0, '#FFF44F');
+  centerGrad.addColorStop(1, '#FFD600');
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, 35, 0, 2 * Math.PI);
+  ctx.fillStyle = centerGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  // Highlight glossy
+  ctx.beginPath();
+  ctx.arc(cx - 8, cy - 8, 12, 0, 2 * Math.PI);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fill();
+}
+
+drawWheel(0);
+
+// ==========================================
+// SPIN LOGIC
+// ==========================================
+function getResult() {
+  const totalWeight = PRIZES.reduce((s, p) => s + p.weight, 0);
+  const rand = Math.random() * totalWeight;
+  let cumul = 0;
+  for (let i = 0; i < PRIZES.length; i++) {
+    cumul += PRIZES[i].weight;
+    if (rand < cumul) return i;
+  }
+  return PRIZES.length - 1;
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'NB';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function spinWheel() {
+  if (isSpinning) return;
+
+  if (checkAlreadyPlayed()) {
+    showAlreadyPlayed();
+    return;
+  }
+
+  isSpinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const resultIndex = getResult();
+  
+  // Choisir un segment visuel aléatoire (0-9)
+  const targetSegment = Math.floor(Math.random() * 10);
+  const targetAngle = targetSegment * segmentAngle + segmentAngle / 2;
+
+  // Nombre de tours complets + position cible
+  const spins = (5 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
+  const finalRotation = spins + (2 * Math.PI - targetAngle) - Math.PI / 2;
+
+  const duration = 5000;
+  const startTime = performance.now();
+  const startRotation = currentRotation;
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 4);
+    
+    const rotation = startRotation + finalRotation * eased;
+    currentRotation = rotation;
+    drawWheel(rotation % (2 * Math.PI));
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      isSpinning = false;
+      showResult(resultIndex);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+// ==========================================
+// RESULT MODAL WITH GIFT BOX REVEAL
+// ==========================================
+function showResult(prizeIndex) {
+  const prize = PRIZES[prizeIndex];
+  const isLost = prizeIndex === 3;
+  const code = isLost ? null : generateCode();
+
+  if (!isLost) markPlayed(prizeIndex, code);
+
+  // Explosion de confettis d'abord
+  launchConfetti();
+
+  // Délai avant affichage modal pour effet surprise
+  setTimeout(() => {
+    // Afficher la mascotte pour les gains
+    const mascot = document.getElementById('mascotReveal');
+    if (!isLost) {
+      mascot.style.display = 'block';
+    } else {
+      mascot.style.display = 'none';
+    }
+
+    document.getElementById('resultEmoji').textContent = prize.emoji;
+    document.getElementById('resultTitle').textContent = isLost ? 'PAS CETTE FOIS !' : '🎁 FÉLICITATIONS ! 🎁';
+    document.getElementById('resultPrize').textContent = prize.label;
+
+    const qrSection = document.getElementById('qrSection');
+    const lostMessage = document.getElementById('lostMessage');
+    const preReviewMessage = document.getElementById('preReviewMessage');
+    const googleBtn = document.getElementById('googleBtn');
+
+    if (!isLost) {
+      // Afficher le message de motivation pour l'avis
+      preReviewMessage.style.display = 'block';
+      lostMessage.style.display = 'none';
+      
+      // Bouton Google visible et proéminent
+      googleBtn.style.display = 'flex';
+      googleBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        ⭐ Laisser un avis Google (30 sec)
+      `;
+
+      // QR code affiché mais visuellement moins prioritaire
+      qrSection.classList.add('visible');
+      
+      // Générer QR code
+      document.getElementById('qrcode').innerHTML = '';
+      const validationData = JSON.stringify({
+        code,
+        prize: prize.label,
+        prizeIndex,
+        ts: Date.now()
+      });
+      
+      new QRCode(document.getElementById('qrcode'), {
+        text: validationData,
+        width: 160,
+        height: 160,
+        colorDark: '#1A1A1A',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      document.getElementById('qrCodeText').textContent = code;
+    } else {
+      qrSection.classList.remove('visible');
+      preReviewMessage.style.display = 'none';
+      lostMessage.style.display = 'block';
+      googleBtn.style.display = 'flex';
+    }
+
+    document.getElementById('resultModal').classList.add('active');
+  }, 600);
+}
+
+function closeModal() {
+  document.getElementById('resultModal').classList.remove('active');
+  if (!checkAlreadyPlayed()) {
+    document.getElementById('spinBtn').disabled = false;
+  }
+}
+
+function showAlreadyPlayed() {
+  const spinBtn = document.getElementById('spinBtn');
+  spinBtn.style.display = 'none';
+
+  const msg = document.createElement('div');
+  msg.className = 'already-played';
+  msg.innerHTML = `<strong>🎡 Déjà joué aujourd'hui !</strong><br><br>
+    Revenez demain pour retenter votre chance et découvrir votre surprise !<br><br>
+    En attendant, votre avis compte beaucoup pour nous 💛<br><br>
+    <a href="http://search.google.com/local/writereview?placeid=ChIJKbaw7qknVQ0R-X8BYske1Ns" 
+       target="_blank" style="color: #FF3366; font-weight: 800; text-decoration: none;">
+      ⭐ Laisser un avis Google
+    </a>`;
+  spinBtn.parentNode.insertBefore(msg, spinBtn.nextSibling);
+}
+
+// ==========================================
+// ENHANCED CONFETTI
+// ==========================================
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#FFD600', '#FF3366', '#FF6B9D', '#66D9EF', '#FFFFFF', '#FFA500'];
+  const shapes = ['●', '★', '♥', '✦', '◆'];
+  
+  for (let i = 0; i < 100; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (8 + Math.random() * 12) + 'px';
+      piece.style.height = (8 + Math.random() * 12) + 'px';
+      
+      // Certains confettis sont des formes
+      if (Math.random() > 0.6) {
+        piece.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+        piece.style.background = 'transparent';
+        piece.style.color = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.fontSize = '20px';
+        piece.style.lineHeight = '1';
+      }
+      
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.3) + 's';
+      container.appendChild(piece);
+      setTimeout(() => piece.remove(), 4500);
+    }, i * 20);
+  }
+}
+
+// Init
+drawWheel(0);
+</script>
+
+</body>
+</html>
